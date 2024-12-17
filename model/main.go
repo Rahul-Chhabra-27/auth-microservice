@@ -1,22 +1,13 @@
 package model
 
-import "time"
+import "gorm.io/gorm"
 
-type Task struct {
-	ID int
+type User struct {
+	gorm.Model
 	Name string
-	Description string
-	Location string
-	DateTime time.Time
-	UserId int
-}
-
-var tasks [] Task = []Task{};
-
-func (task Task) SaveTask() {
-	tasks = append(tasks, task);
-}
-
-func GetAllTheTasks() [] Task {
-	return tasks;
+	Password string
+	Email string `gorm:"unique"`
+	Phone string `gorm:"unique"`
+	Address string
+	City string
 }

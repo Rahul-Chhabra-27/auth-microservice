@@ -1,52 +1,38 @@
 package main
 
 import (
-	"auth-micro/model"
-	"fmt"
-	"net/http"
+	"auth-micro/config"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	"go.uber.org/zap"
+	"gorm.io/gorm"
 )
 
-// 1. SaveTaskToDB
-// 2.GenerateTask
-func GenerateTask(context *gin.Context) {
-	var task model.Task;
-	err := context.ShouldBindJSON(&task);
-	fmt.Println(task)
+var logger *zap.Logger
+var userDbConnector *gorm.DB
+func init() {
+	var err error;
+	logger, err = zap.NewDevelopment();
+
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"message" : "Bad Request",
-			"error":err,
-		});
-	}  else {
-		task.ID = 10;
-		task.SaveTask();
-		context.JSON(http.StatusCreated, gin.H{
-			"message" : "Task has been successfully created!",
-			"task": task,
-		})
+		panic(err)
 	}
-}
-func GetAllTheTasks(context *gin.Context) {
-	tasks := model.GetAllTheTasks();
-	context.JSON(http.StatusOK, gin.H{
-		"message":"Successfully fetched all the tasks",
-		"tasks":tasks,
-	})
+	defer logger.Sync();
 }
 // entry point
 func main() {
+	if err := godotenv.Load(".env"); err != nil {
+		panic("No .env file found")
+	}
+	userDbConnector = config.ConnectDB();
+
 	// configuration of the http server.
 	httpServer := gin.Default();
-
 	//? Method : @POST
-	// ? Endpoint Route : /save-task 
-	httpServer.POST("/save-task", GenerateTask);
-	//? Method : @GET
-	// ? Endpoint Route : /get-tasks 
-	httpServer.GET("/get-tasks",GetAllTheTasks);
-	
+	// ? Endpoint Route : /save-user
+	httpServer.POST("/save-user",AddUser)
+
 	// running the server
 	httpServer.Run(":8080");  // Infinite loop
 	
