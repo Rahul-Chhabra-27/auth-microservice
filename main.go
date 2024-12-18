@@ -32,7 +32,7 @@ func main() {
 	//? Method : @POST
 	// ? Endpoint Route : /save-user
 	httpServer.POST("/save-user",AddUser)
-
+	httpServer.POST("/authenticate-user",AuthenticateUser)
 	// running the server
 	httpServer.Run(":8080");  // Infinite loop
 	

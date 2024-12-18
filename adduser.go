@@ -1,6 +1,7 @@
 package main
 
 import (
+	"auth-micro/config"
 	"auth-micro/model"
 	"fmt"
 	"net/http"
@@ -17,15 +18,18 @@ func AddUser(ctx *gin.Context) {
   logger.Info("Recieved User Request", zap.String("useremail", user.Email), zap.String("username", user.Name));
 
   // 1. write the validation logic.
+  if !config.ValidatingFieldsOfUser(user) {
+	logger.Warn("Invalid fields")
+	ctx.JSON(http.StatusBadRequest, gin.H{"message":"Invalid Fields"})
+  }
   // 2. Check for Existing User.
   var existingUser model.User;
 //   userNotFoundError := userDbConnector.Where("email = ?,", user.Email).First(&existingUser).Error;
  userNotFoundError := userDbConnector.Where("email = ?", user.Email).First(&existingUser).Error;
-//  fmt.Println(userNotFoundError);
   // user doesn't exist
   if userNotFoundError == gorm.ErrRecordNotFound {
 	// 3. Creating a hashed password
-	hashedPassword := user.Password;
+	hashedPassword := config.GenerateHashedPassword(user.Password);
 
 	newUser := &model.User{ Name: user.Name, Email: user.Email, Password: hashedPassword, Address: user.Address, City: user.City, Phone: user.Phone }
 
