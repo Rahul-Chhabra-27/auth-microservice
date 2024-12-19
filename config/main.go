@@ -55,12 +55,15 @@ func ValidatePhone(phone string) bool {
 	return true
 }
 func ValidatingFieldsOfUser(user model.User) bool {
-	if (user.Name != "" || user.Password != "" || user.Address != "" || user.City != "") {
+
+	if (user.Name == "" || user.Password == "" || user.Address == "" || user.City == "") {
 		return false
 	}
+	fmt.Println("Here");
 	if (!strings.Contains(user.Email,"@") || !strings.Contains(user.Email,".")) {
 		return false
 	}
+	fmt.Println("Here");
 	return len(user.Password) >= 6 && ValidatePhone(user.Phone);
 }
 // func ValidatingFieldsOfUser(user model.User) bool { 

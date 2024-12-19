@@ -21,6 +21,7 @@ func AddUser(ctx *gin.Context) {
   if !config.ValidatingFieldsOfUser(user) {
 	logger.Warn("Invalid fields")
 	ctx.JSON(http.StatusBadRequest, gin.H{"message":"Invalid Fields"})
+	return;
   }
   // 2. Check for Existing User.
   var existingUser model.User;
@@ -41,7 +42,11 @@ func AddUser(ctx *gin.Context) {
 		return
 	}
 	logger.Info(fmt.Sprintf("User %s created successfully", user.Name));
-	ctx.JSON(http.StatusCreated, gin.H{ "message" : "User created successfully" })
+	token,err:=JwtManager.GeneratingToken(newUser);
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError,gin.H{"token failure":"Couldn't generate the token"})
+	}
+	ctx.JSON(http.StatusCreated, gin.H{ "message" : "User created successfully", "token":token })
   } else {
 	logger.Warn("User Email Already Exist", zap.String("usermail", user.Email))
 	ctx.JSON(http.StatusConflict, gin.H{"message" : "User Email Already Exist"})
